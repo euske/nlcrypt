@@ -2,23 +2,26 @@
 
 PYTHON=python
 CMP=cmp
+RSYNC=rsync -av
+
 WORDNET_DICT=./WordNet-dict
 MKDICT=$(PYTHON) mkdict.py
 NLCRYPT=$(PYTHON) nlcrypt.py
 WEBAPP=$(PYTHON) app.py
 
-all: dicts
+DICTS=g2w.cdb w2g.cdb
+PUBLIC_URL=tabesugi:public/cgi/root/host/nlcrypt.tabesugi.net/
+
+all: $(DICTS)
 
 clean:
 	-$(RM) *.cdb *.pyc
 	-$(RM) *.crypt *.out
 
-dicts: g2w.cdb w2g.cdb
-
-g2w.cdb w2g.cdb: $(WORDNET_DICT) index.skip
+$(DICTS): $(WORDNET_DICT) index.skip
 	$(MKDICT) -s index.skip $(WORDNET_DICT)
 
-test: dicts
+test: $(DICTS)
 	$(NLCRYPT) abc sample.txt > sample.txt.crypt
 	$(NLCRYPT) -R abc sample.txt.crypt > sample.txt.out
 	$(CMP) sample.txt sample.txt.out
@@ -26,5 +29,8 @@ test: dicts
 	$(NLCRYPT) -C -R abc sample.txt.crypt > sample.txt.out
 	$(CMP) sample.txt sample.txt.out
 
-runapp: dicts
+runapp: $(DICTS)
 	$(WEBAPP) -s
+
+update: $(DICTS)
+	$(RSYNC) app.py nlcrypt.py pycdb.py $(DICTS) $(PUBLIC_URL)

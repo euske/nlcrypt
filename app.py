@@ -382,7 +382,7 @@ def main(app, argv):
             port = int(args.pop(0))
         run_server(host, port, app)
     else:
-        run_cgi(app)
+        run_httpcgi(app)
     return
 
 
@@ -405,7 +405,7 @@ class NLCryptHTML(NLCrypt):
             self.logs.append(
                 Template(
                     '<span class=info>Word</span>($(grp)): '
-                    '$(w0)($(n0)) &rarr; $(w1)($(n1))<br>',
+                    '$(w0)($(n0)) &rarr; $(w1)($(n1))<br>\n',
                     grp=grp, w0=w0, n0=n0, w1=w1, n1=n1))
         return
         
@@ -414,11 +414,17 @@ class NLCryptHTML(NLCrypt):
             self.logs.append(
                 Template(
                     '<span class=info>Letter</span>: '
-                    '$(w0) &rarr; $(w1)<br>',
+                    '$(w0) &rarr; $(w1)<br>\n',
                     w0=w0, w1=w1))
         return
 
 class NLCryptApp(WebApp):
+
+    MAXCHARS = 2000
+    OPTIONS = (('eb', 'Encryption'),
+               ('db', 'Decryption'),
+               ('ec', 'Encryption (CBC)'),
+               ('dc', 'Decryption (CBC)'))
 
     @GET('/')
     def index(self):
@@ -429,54 +435,64 @@ class NLCryptApp(WebApp):
         return
     
     @POST('/crypt')
-    def crypt(self, s=None, k=None, t=None, d=None):
+    def crypt(self, s=u'', k=u'', t=u'', d=u''):
         yield Response()
         yield self.header()
-        key = k.encode('utf-8')
-        reverse = t.startswith('d')
+        options = dict(self.OPTIONS)
+        decrypt = t.startswith('d')
         cbc = t.endswith('c')
         debug = bool(d)
-        crypt = NLCryptHTML(key, reverse=reverse, cbc=cbc, debug=debug)
-        s = crypt.feed(s)
-        yield Template(
-            '<div class=result>Result</div>'
-            '<blockquote>$(s)</blockquote>',
-            s=s)
-        yield self.form(s=s, k=k, reverse=reverse, cbc=cbc, debug=debug)
-        if crypt.logs:
-            yield Template('<div class=debug>Debug Information</div>')
+        crypt = None
+        if not k:
+            yield Template(
+                '<div class=error>Error: Provide an encryption key.</div>\n')
+        elif t not in options:
+            yield Template(
+                '<div class=error>Error: Invalid option.</div>\n')
+        elif s:
+            key = k.encode('utf-8')
+            crypt = NLCryptHTML(key, reverse=decrypt, cbc=cbc, debug=debug)
+            if self.MAXCHARS < len(s):
+                s = s[:self.MAXCHARS]
+                yield Template(
+                    '<div class=error>Notice: Text is truncated to 2,000 letters.</div>\n')
+            s = crypt.feed(s)
+            yield Template(
+                '<div class=result>Result ($(opt)):</div>\n'
+                '<blockquote>$(s)</blockquote>\n',
+                opt=options[t], s=s)
+        yield self.form(s=s, k=k, decrypt=(not decrypt), cbc=cbc, debug=debug)
+        if crypt is not None and crypt.logs:
+            yield Template('<div class=debug>Debug Information:</div>\n')
             yield crypt.logs
         yield self.footer()
         return
 
     def header(self):
         return Template(
-            '<html><head>'
-            '<title>NLCrypt : Natural Language Cryptography</title>'
-            '</head><body>'
-            '<h1>NLCrypt : Natural Language Cryptography</h1>'
+            '<html><head>\n'
+            '<title>NLCrypt : Natural Language Cryptography</title>\n'
+            '</head><body>\n'
+            '<h1>NLCrypt : Natural Language Cryptography</h1>\n'
             )
 
     def footer(self):
         return Template(
-            '<hr>'
-            '</body></html>')
+            '<hr>\n'
+            '</body></html>\n')
 
     def form(self,
              s=u'Text to encrypt/decrypt.',
              k=u'',
-             reverse=False, cbc=False, debug=False):
+             decrypt=False, cbc=False, debug=False):
         yield Template(
-            '<form method="POST" action="/crypt">'
-            '<textarea name="s" cols="80" rows="8">$(s)</textarea>'
+            '<form method="POST" action="/crypt">\n'
+            '<div><textarea name="s" cols="80" rows="8">$(s)</textarea></div>\n'
             '<div><select name="t">',
             s=s)
-        for (t,v) in (('eb', 'Encryption'),
-                      ('db', 'Decryption'),
-                      ('ec', 'Encryption (CBC)'),
-                      ('dc', 'Decryption (CBC)')):
+        for (t,v) in self.OPTIONS:
             selected = ('selected'
-                        if (reverse == t.startswith('d') and cbc == t.endswith('c'))
+                        if (decrypt == t.startswith('d') and cbc == t.endswith('c'))
                         else '')
             yield Template('<option value="$(t)" $(selected)>$(v)</option>',
                            selected=selected, t=t, v=v)
@@ -488,7 +504,8 @@ class NLCryptApp(WebApp):
             '<input type=reset> &nbsp;'
             '<label for="debug">'
             '<input id="debug" name="d" type=checkbox $(checked)> Debug mode'
-            '</label></div></form>',
+            '</label></div>\n',
+            '</form>\n',
             checked=checked, k=k)
         return
 

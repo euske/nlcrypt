@@ -1,56 +1,12 @@
 #!/usr/bin/env python
 ##
-##  Whabapp - A Web application microframework
+##  NLCrypt WebApp
 ##
 ##  usage: $ python app.py -s localhost 8080
 ##
 import sys
 import re
 import cgi
-
-STATUS_CODE = {
-    100: 'Continue',
-    101: 'Switching Protocols',
-    200: 'OK',
-    201: 'Created',
-    202: 'Accepted',
-    203: 'Non-Authoritative Information',
-    204: 'No Content',
-    205: 'Reset Content',
-    206: 'Partial Content',
-    300: 'Multiple Choices',
-    301: 'Moved Permanently',
-    302: 'Found',
-    303: 'See Other',
-    304: 'Not Modified',
-    305: 'Use Proxy',
-    306: 'Reserved',
-    307: 'Temporary Redirect',
-    400: 'Bad Request',
-    401: 'Unauthorized',
-    402: 'Payment Required',
-    403: 'Forbidden',
-    404: 'Not Found',
-    405: 'Method Not Allowed',
-    406: 'Not Acceptable',
-    407: 'Proxy Authentication Required',
-    408: 'Request Timeout',
-    409: 'Conflict',
-    410: 'Gone',
-    411: 'Length Required',
-    412: 'Precondition Failed',
-    413: 'Request Entity Too Large',
-    414: 'Request-URI Too Long',
-    415: 'Unsupported Media Type',
-    416: 'Requested Range Not Satisfiable',
-    417: 'Expectation Failed',
-    500: 'Internal Server Error',
-    501: 'Not Implemented',
-    502: 'Bad Gateway',
-    503: 'Service Unavailable',
-    504: 'Gateway Timeout',
-    505: 'HTTP Version Not Supported',
-    }
 
 # quote HTML metacharacters.
 def q(s):
@@ -242,8 +198,8 @@ def POST(pat): return Router.make_wrapper('POST', pat)
 ##
 class Response(object):
 
-    def __init__(self, status_code=200, content_type='text/html', **kwargs):
-        self.status_code = status_code
+    def __init__(self, status='200 OK', content_type='text/html; charset=utf-8', **kwargs):
+        self.status = status
         self.headers = [('Content-Type', content_type)]+kwargs.items()
         return
 
@@ -254,19 +210,19 @@ class Response(object):
 class Redirect(Response):
 
     def __init__(self, location):
-        Response.__init__(self, 302, Location=location)
+        Response.__init__(self, '302 Found', Location=location)
         return
 
 class NotFound(Response):
 
     def __init__(self):
-        Response.__init__(self, 404)
+        Response.__init__(self, '404 Not Found')
         return
 
 class InternalError(Response):
 
     def __init__(self):
-        Response.__init__(self, 500)
+        Response.__init__(self, '500 Internal Server Error')
         return
 
 
@@ -313,8 +269,7 @@ class WebApp(object):
             result = self.get_default(path, fields, environ)
         def f(obj):
             if isinstance(obj, Response):
-                status = '%d %s' % (obj.status_code, STATUS_CODE[obj.status_code])
-                start_response(status, obj.headers)
+                start_response(obj.status, obj.headers)
             elif isinstance(obj, Template):
                 for x in obj.render(codec=self.codec):
                     if isinstance(x, unicode):
@@ -435,10 +390,11 @@ class NLCryptApp(WebApp):
         return
     
     @POST('/crypt')
-    def crypt(self, s=u'', k=u'', t=u'', d=u''):
+    def crypt(self, s='', k='', t='', d=''):
         yield Response()
         yield self.header()
         options = dict(self.OPTIONS)
+        s = s.decode(self.codec, 'ignore')
         decrypt = t.startswith('d')
         cbc = t.endswith('c')
         debug = bool(d)
@@ -450,18 +406,18 @@ class NLCryptApp(WebApp):
             yield Template(
                 '<div class=error>Error: Invalid option.</div>\n')
         elif s:
-            key = k.encode('utf-8')
-            crypt = NLCryptHTML(key, reverse=decrypt, cbc=cbc, debug=debug)
+            crypt = NLCryptHTML(k, reverse=decrypt, cbc=cbc, debug=debug)
             if self.MAXCHARS < len(s):
                 s = s[:self.MAXCHARS]
                 yield Template(
                     '<div class=error>Notice: Text is truncated to 2,000 letters.</div>\n')
             s = crypt.feed(s)
+            decrypt = (not decrypt)
             yield Template(
                 '<div class=result>Result ($(opt)):</div>\n'
                 '<blockquote>$(s)</blockquote>\n',
                 opt=options[t], s=s)
-        yield self.form(s=s, k=k, decrypt=(not decrypt), cbc=cbc, debug=debug)
+        yield self.form(s=s, k=k, decrypt=decrypt, cbc=cbc, debug=debug)
         if crypt is not None and crypt.logs:
             yield Template('<div class=debug>Debug Information:</div>\n')
             yield crypt.logs
@@ -499,13 +455,13 @@ class NLCryptApp(WebApp):
         checked = ('checked' if debug else '')
         yield Template(
             '</select> &nbsp;'
-            'with Key <input name="k" size="20" value="$(k)"> &nbsp;'
-            '<input type=submit value="Submit"> &nbsp;'
-            '<input type=reset> &nbsp;'
+            'with Key <input name="k" size="10" value="$(k)"> &nbsp;'
             '<label for="debug">'
             '<input id="debug" name="d" type=checkbox $(checked)> Debug mode'
-            '</label></div>\n',
-            '</form>\n',
+            '</label> &nbsp;'
+            '<input type=submit value="Submit"> &nbsp;'
+            '<input type=reset> &nbsp;'
+            '</div></form>\n',
             checked=checked, k=k)
         return
 

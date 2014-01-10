@@ -102,7 +102,7 @@ class NLCrypt(object):
     
     def crypt_word(self, w0, force=False):
         w1 = None
-        k = w0.lower()
+        k = w0.lower().replace(u'\u2019',u",")
         if self.IGNORE.match(k):
             w1 = w0
             self._debug_ignore(w0)
@@ -122,7 +122,7 @@ class NLCrypt(object):
             self._debug_unknown(w0, w1)
         return w1
 
-    WORD = re.compile(ur'[-\'\-\.\w]+', re.U)
+    WORD = re.compile(ur'[-\u2019\'\-\.\w]+', re.U)
     PART = re.compile(ur'\d+|\w+|\'\w+', re.U)
 
     def _handle_a(self, w):

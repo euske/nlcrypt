@@ -359,7 +359,7 @@ class NLCryptHTML(NLCrypt):
         if self.debug:
             self.logs.append(
                 Template(
-                    '<span class=info>Word</span>($(grp)): '
+                    '<span class=info>Word</span> ($(grp)): '
                     '$(w0)($(n0)) &rarr; $(w1)($(n1))<br>\n',
                     grp=grp, w0=w0, n0=n0, w1=w1, n1=n1))
         return
@@ -385,6 +385,8 @@ class NLCryptApp(WebApp):
     def index(self):
         yield Response()
         yield self.header()
+        yield Template(
+            '<p> NLCrypt is an attempt to disguise cryptography as a nonsensical text.')
         yield self.form()
         yield self.footer()
         return
@@ -428,6 +430,13 @@ class NLCryptApp(WebApp):
         return Template(
             '<html><head>\n'
             '<title>NLCrypt : Natural Language Cryptography</title>\n'
+            '<style><!--\n'
+            '.debug { font-size:120%; font-weight:bold; color:magenta; }\n'
+            '.error { font-size:120%; font-weight:bold; color:red; }\n'
+            '.result { font-size:120%; font-weight:bold; color:green; }\n'
+            '.info { font-weight:bold; color:blue; }\n'
+            'blockquote { background:#eeeeee; }\n'
+            '--></style>\n'
             '</head><body>\n'
             '<h1>NLCrypt : Natural Language Cryptography</h1>\n'
             )
@@ -435,10 +444,12 @@ class NLCryptApp(WebApp):
     def footer(self):
         return Template(
             '<hr>\n'
+            '<a href="https://github.com/euske/nlcrypt">Powered by NLCrypt</a>\n'
+            '<address>Yusuke Shinyama</address>\n'
             '</body></html>\n')
 
     def form(self,
-             s=u'Text to encrypt/decrypt.',
+             s=u'Type text here.',
              k=u'',
              decrypt=False, cbc=False, debug=False):
         yield Template(

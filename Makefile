@@ -33,4 +33,4 @@ runapp: $(DICTS)
 	$(WEBAPP) -s
 
 update: $(DICTS)
-	$(RSYNC) app.py nlcrypt.py pycdb.py $(DICTS) $(PUBLIC_URL)
+	$(RSYNC) quotes.txt app.py nlcrypt.py pycdb.py $(DICTS) $(PUBLIC_URL)

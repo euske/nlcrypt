@@ -1,0 +1,6 @@
+Anyone can create an algorithm that he himself can't break.
+It is poor civic hygiene to install technologies that could someday facilitate a police state.
+The user's going to pick dancing pigs over security every time.
+Security theater refers to security measures that make people feel more secure without doing anything to actually improve their security.
+There are two kinds of cryptography in this world: cryptography that will stop your kid sister from reading your files, and cryptography that will stop major governments from reading your files. 
+Trust the math. Encryption is your friend. Use it well, and do your best to ensure that nothing can compromise it.

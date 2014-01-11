@@ -344,6 +344,7 @@ def main(app, argv):
 ##  NLCryptApp
 ##
 from nlcrypt import NLCrypt
+from random import choice, randrange
 class NLCryptHTML(NLCrypt):
 
     def __init__(self, key, reverse=False, cbc=False, basedir='.', debug=0):
@@ -360,7 +361,7 @@ class NLCryptHTML(NLCrypt):
             self.logs.append(
                 Template(
                     '<span class=info>Word</span> ($(grp)): '
-                    '$(w0)($(n0)) &rarr; $(w1)($(n1))<br>\n',
+                    '<em>$(w0)</em>($(n0)) &rarr; <em>$(w1)</em>($(n1))<br>\n',
                     grp=grp, w0=w0, n0=n0, w1=w1, n1=n1))
         return
         
@@ -369,7 +370,7 @@ class NLCryptHTML(NLCrypt):
             self.logs.append(
                 Template(
                     '<span class=info>Letter</span>: '
-                    '$(w0) &rarr; $(w1)<br>\n',
+                    '<em>$(w0)</em> &rarr; <em>$(w1)</em><br>\n',
                     w0=w0, w1=w1))
         return
 
@@ -386,8 +387,18 @@ class NLCryptApp(WebApp):
         yield Response()
         yield self.header()
         yield Template(
-            '<p> NLCrypt is an attempt to disguise cryptography as a nonsensical text.')
-        yield self.form()
+            '<p> NLCrypt is an attempt to disguise cryptography as a nonsensical text.'
+            '<div class=warning>Warning: '
+            'Do NOT use this for credit card numbers or passwords.</div>')
+        k = u''.join( choice('abcdefghijklmnopqrstuvwxyz') for _ in range(randrange(5,10)) )
+        s = u''
+        try:
+            fp = file('quotes.txt')
+            s = choice(list(fp)).strip()
+            fp.close()
+        except IOError:
+            pass
+        yield self.form(k=k, s=s)
         yield self.footer()
         return
     
@@ -429,16 +440,18 @@ class NLCryptApp(WebApp):
     def header(self):
         return Template(
             '<html><head>\n'
-            '<title>NLCrypt : Natural Language Cryptography</title>\n'
+            '<title>NLCrypt : Semantic Cryptography</title>\n'
             '<style><!--\n'
+            'h1 { border-bottom: 2pt solid black; }\n'
+            'blockquote { background:#eeeeee; }\n'
             '.debug { font-size:120%; font-weight:bold; color:magenta; }\n'
             '.error { font-size:120%; font-weight:bold; color:red; }\n'
             '.result { font-size:120%; font-weight:bold; color:green; }\n'
             '.info { font-weight:bold; color:blue; }\n'
-            'blockquote { background:#eeeeee; }\n'
+            '.warning { font-weight:bold; color:red; }\n'
             '--></style>\n'
             '</head><body>\n'
-            '<h1>NLCrypt : Natural Language Cryptography</h1>\n'
+            '<h1>NLCrypt : Semantic Cryptography</h1>\n'
             )
 
     def footer(self):

@@ -15,6 +15,26 @@ http://nlcrypt.tabesugi.net/
 Installation
 ------------
 
-WordNet-3.0 is required.
-http://wordnet.princeton.edu/
+Prerequisites:
+
+* Python 2.6 or above (Python 3 is not supported).
+* WordNet-3.0. http://wordnet.princeton.edu/
+
+How to build:
+
+    $ make
+
+Command Line Usage
+------------------
+
+Syntax:
+
+    $ nlcrypt.py [options] key [file ...]
+
+Options:
+
+ * -c codec ... Specifies a Python codec (default: utf-8)
+ * -b basedir ... Directory for dictionary files (w2g.cdb and g2w.cdb)
+ * -R ... Reverse the direction (decryption).
+ * -C ... Enables CBC mode.
 

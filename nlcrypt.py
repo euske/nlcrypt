@@ -1,4 +1,16 @@
 #!/usr/bin/env python
+##
+##  nlcrypt.py - Semantic Cryptography
+##
+##  Usage:
+##    $ nlcrypt.py [options] key [file ...]
+##
+##  Options:
+##    -c codec          Specifies a Python codec (default: utf-8)
+##    -b basedir        Directory for dictionary files (w2g.cdb and g2w.cdb)
+##    -R                Reverse the direction (decryption).
+##    -C                Enables CBC mode.
+##
 import re
 import sys
 import hashlib

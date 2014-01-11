@@ -360,7 +360,7 @@ class NLCryptHTML(NLCrypt):
         if self.debug:
             self.logs.append(
                 Template(
-                    '<span class=info>Word</span> ($(grp)): '
+                    '<span class=item>Word</span> ($(grp)): '
                     '<em>$(w0)</em>($(n0)) &rarr; <em>$(w1)</em>($(n1))<br>\n',
                     grp=grp, w0=w0, n0=n0, w1=w1, n1=n1))
         return
@@ -369,7 +369,7 @@ class NLCryptHTML(NLCrypt):
         if self.debug:
             self.logs.append(
                 Template(
-                    '<span class=info>Letter</span>: '
+                    '<span class=item>Letter</span>: '
                     '<em>$(w0)</em> &rarr; <em>$(w1)</em><br>\n',
                     w0=w0, w1=w1))
         return
@@ -387,8 +387,9 @@ class NLCryptApp(WebApp):
         yield Response()
         yield self.header()
         yield Template(
-            '<p> NLCrypt is a casual cryptography that disguises a secret message as '
-            'a grammatical (but nonsensical) text by changing its meanings.'
+            '<p class=info> NLCrypt is a casual cryptography system '
+            'that disguises a secret message as a grammatical (but nonsensical) text. '
+            '<a href="https://github.com/euske/nlcrypt">[More info]</a>\n'
             '<div class=warning>Warning: '
             'Do NOT use this for credit card numbers or passwords.</div>')
         k = u''.join( choice('abcdefghijklmnopqrstuvwxyz') for _ in range(randrange(5,10)) )
@@ -443,22 +444,27 @@ class NLCryptApp(WebApp):
             '<html><head>\n'
             '<title>NLCrypt : Semantic Cryptography</title>\n'
             '<style><!--\n'
-            'h1 { border-bottom: 2pt solid black; }\n'
+            'h1 { border-bottom:2pt solid black; }\n'
+            'h1 a { text-decoration:none; }\n'
             'blockquote { background:#eeeeee; }\n'
             '.debug { font-size:120%; font-weight:bold; color:magenta; }\n'
             '.error { font-size:120%; font-weight:bold; color:red; }\n'
             '.result { font-size:120%; font-weight:bold; color:green; }\n'
-            '.info { font-weight:bold; color:blue; }\n'
+            '.item { font-weight:bold; color:blue; }\n'
             '.warning { font-weight:bold; color:red; }\n'
+            '.info { font-size:80%; }\n'
             '--></style>\n'
             '</head><body>\n'
-            '<h1>NLCrypt : Semantic Cryptography</h1>\n'
+            '<h1><a href="/">NLCrypt : Semantic Cryptography</a></h1>\n'
             )
 
     def footer(self):
         return Template(
             '<hr>\n'
-            '<a href="https://github.com/euske/nlcrypt">Powered by NLCrypt</a>\n'
+            '<div class=info><strong>Disclaimer:</strong> '
+            'This is an experimental website. The information you send is not protected. '
+            'The cryptography can be changed without notice. Use at your own risk. '
+            '</div>\n'
             '<address>Yusuke Shinyama</address>\n'
             '</body></html>\n')
 

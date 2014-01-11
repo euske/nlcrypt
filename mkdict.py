@@ -12,6 +12,9 @@ try:
 except ImportError:
   import pycdb as cdb
 
+C = 1.0/math.log(2)
+def convfreq(n):
+  return C*math.log(n)+0.5
 
 pat_ys = re.compile(r'.*[^auieo]y$')
 def get_s(s):
@@ -171,7 +174,6 @@ class DictionaryConverter(object):
         self.vbg_exc[s0] = s1
     return
 
-  C = 1.0
   def read_cntlist(self):
     freq = {}
     fp = self._open_file('cntlist')
@@ -184,7 +186,7 @@ class DictionaryConverter(object):
     fp.close()
     self.weight = {}
     for (w,n) in freq.iteritems():
-      self.weight[w] = int(math.log(n)*self.C)
+      self.weight[w] = int(convfreq(n))
     return
 
   def read_skip(self, fp):
@@ -258,10 +260,12 @@ class DictionaryConverter(object):
       if grp not in grp2words: grp2words[grp] = []
       grp2words[grp].append(w)
     word2grp = {}
-    for (grp, words) in grp2words.iteritems():
+    r = sorted(grp2words.iteritems(), key=lambda (k,v):len(v), reverse=True)
+    for (grp, words) in r:
       words.sort()
       for (n,w) in enumerate(words):
         word2grp[w] = (grp, n)
+      print >>sys.stderr, ' Group: %r (%d)' % (grp, len(words))
     print >>sys.stderr, 'Writing: %r' % g2wpath
     g2w = cdb.cdbmake(g2wpath, g2wpath+'.tmp')
     for (grp,words) in grp2words.iteritems():

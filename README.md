@@ -1,8 +1,20 @@
-NLCrypt: Natural Language Cryptography
-======================================
+NLCrypt: Semantic Cryptography
+==============================
 
 NLCrypt is an attempt to create a cryptography system
-that disguises a normal (grammatical but nonsensical) text.
+that doesn't look like a cryptography.
 
-Requires WordNet-3.0.
-cf. http://wordnet.princeton.edu/
+It disguises a secret message as a grammatical (but nonsensical) text
+by changing its meanings.
+
+Demo
+----
+
+http://nlcrypt.tabesugi.net/
+
+Installation
+------------
+
+WordNet-3.0 is required.
+http://wordnet.princeton.edu/
+

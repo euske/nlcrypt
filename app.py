@@ -387,7 +387,8 @@ class NLCryptApp(WebApp):
         yield Response()
         yield self.header()
         yield Template(
-            '<p> NLCrypt is an attempt to disguise cryptography as a nonsensical text.'
+            '<p> NLCrypt is a casual cryptography that disguises a secret message as '
+            'a grammatical (but nonsensical) text by changing its meanings.'
             '<div class=warning>Warning: '
             'Do NOT use this for credit card numbers or passwords.</div>')
         k = u''.join( choice('abcdefghijklmnopqrstuvwxyz') for _ in range(randrange(5,10)) )

@@ -22,7 +22,12 @@ Prerequisites:
 
 How to build:
 
+Unzip the WordNet dictionary directory as `WordNet-dict` then type this.
+
     $ make
+
+After this you should see `w2g.cdb` and `g2w.cdb` files.
+
 
 Command Line Usage
 ------------------
@@ -33,8 +38,8 @@ Syntax:
 
 Options:
 
- * -c codec ... Specifies a Python codec (default: utf-8)
- * -b basedir ... Directory for dictionary files (w2g.cdb and g2w.cdb)
+ * -c codec ... Specifies a Python codec (default: `utf-8`)
+ * -b basedir ... Directory for dictionary files (`w2g.cdb` and `g2w.cdb`)
  * -R ... Reverse the direction (decryption).
- * -C ... Enables CBC mode.
-
+ * -C ... Enables CBC mode. It makes the encrypted text even more nonsensical
+   (but probably harder to guess the meaning).

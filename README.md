@@ -22,7 +22,7 @@ Prerequisites:
 
 How to build:
 
-Unzip the WordNet dictionary directory as `WordNet-dict` then type this.
+Unpack the WordNet tarball as `WordNet-3.0` then type this.
 
     $ make
 

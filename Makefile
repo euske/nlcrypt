@@ -4,7 +4,7 @@ PYTHON=python
 CMP=cmp
 RSYNC=rsync -av
 
-WORDNET_DICT=./WordNet-dict
+WORDNET_DIR=./WordNet-3.0
 MKDICT=$(PYTHON) mkdict.py
 NLCRYPT=$(PYTHON) nlcrypt.py
 WEBAPP=$(PYTHON) app.py
@@ -18,8 +18,8 @@ clean:
 	-$(RM) *.cdb *.pyc
 	-$(RM) *.crypt *.out
 
-$(DICTS): $(WORDNET_DICT) index.skip
-	$(MKDICT) -s index.skip $(WORDNET_DICT)
+$(DICTS): $(WORDNET_DIR) index.skip
+	$(MKDICT) -s index.skip $(WORDNET_DIR)/dict
 
 test: $(DICTS)
 	$(NLCRYPT) abc sample.txt > sample.txt.crypt

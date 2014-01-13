@@ -207,55 +207,46 @@ class DictionaryConverter(object):
       (w, t) = (f[0], f[1])
       if not self.pat_word.match(w): continue
       if len(w) < 2: continue
+      w = w.lower()
       if t == 'a':              # adj
-        self._add_pos(w, 'JJ')
-        self._add_pos(get_comparative(w, self.jjr_exc), 'JJR')
-        self._add_pos(get_superlative(w, self.jjs_exc), 'JJS')
+        self._add_pos(w, w, 'JJ')
+        self._add_pos(w, get_comparative(w, self.jjr_exc), 'JJR')
+        self._add_pos(w, get_superlative(w, self.jjs_exc), 'JJS')
       elif t == 'r':            # adv
-        self._add_pos(w, 'RB')
-        self._add_pos(get_comparative(w, self.rbr_exc), 'RBR')
-        self._add_pos(get_superlative(w, self.rbs_exc), 'RBS')
+        self._add_pos(w, w, 'RB')
+        self._add_pos(w, get_comparative(w, self.rbr_exc), 'RBR')
+        self._add_pos(w, get_superlative(w, self.rbs_exc), 'RBS')
       elif t == 'n':            # noun
-        self._add_pos(w, 'NN')
-        self._add_pos(get_plural(w, self.nns_exc), 'NNS')
+        self._add_pos(w, w, 'NN')
+        self._add_pos(w, get_plural(w, self.nns_exc), 'NNS')
       elif t == 'v':            # verb
-        self._add_pos(w, 'VB')
-        self._add_pos(w, 'VBP')
-        self._add_pos(get_pres3rd(w, self.vbz_exc), 'VBZ')
-        self._add_pos(get_past(w, self.vbd_exc), 'VBD')
-        self._add_pos(get_pastpart(w, self.vbn_exc), 'VBN')
+        self._add_pos(w, w, 'VB')
+        self._add_pos(w, w, 'VBP')
+        self._add_pos(w, get_pres3rd(w, self.vbz_exc), 'VBZ')
+        self._add_pos(w, get_past(w, self.vbd_exc), 'VBD')
+        self._add_pos(w, get_pastpart(w, self.vbn_exc), 'VBN')
         if not '_' in w:
-          self._add_pos(get_gerund(w, self.vbg_exc), 'VBG')
+          self._add_pos(w, get_gerund(w, self.vbg_exc), 'VBG')
       else:
         assert 0, (w, t)
         
     return self
 
-  def _add_pos(self, w, pos):
-    w = w.lower()
+  def _add_pos(self, w0, w, pos):
     if w in self.skip: return
     if w in self._words:
-      poss = self._words[w]
+      (_,poss) = self._words[w]
     else:
+      n = self.weight.get(w0, 0)
       poss = set()
-      self._words[w] = poss
+      self._words[w] = (n, poss)
     poss.add(pos)
-    return
-
-  def filter_unusual(self, threshold=0.03):
-    for (w, poss) in self._words.iteritems():
-      t = sum(poss.itervalues())
-      if t == 0: continue
-      for (pos, f) in poss.items():
-        if f and float(f)/t < threshold:
-          del poss[pos]
     return
 
   def write(self, g2wpath, w2gpath):
     print >>sys.stderr, 'Sorting...'
     grp2words = {}
-    for (w, poss) in self._words.iteritems():
-      n = self.weight.get(w, 0)
+    for (w, (n,poss)) in self._words.iteritems():
       grp = '%s:%d' % ('+'.join(poss), n)
       if grp not in grp2words: grp2words[grp] = []
       grp2words[grp].append(w)
@@ -309,7 +300,6 @@ def main(argv):
   converter.read('adv')
   converter.read('noun')
   converter.read('verb')
-  #converter.filter_unusual()
   g2wpath = os.path.join(outdir, 'g2w.cdb')
   w2gpath = os.path.join(outdir, 'w2g.cdb')
   converter.write(g2wpath, w2gpath)

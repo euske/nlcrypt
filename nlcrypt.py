@@ -14,6 +14,7 @@
 import re
 import sys
 import hashlib
+import hmac
 import struct
 import os.path
 try:
@@ -63,8 +64,7 @@ class NLCrypt(object):
             CHAR2GROUP[c] = (grp,n)
 
     def __init__(self, key, reverse=False, cbc=False, basedir='.', debug=0):
-        self._hash = hashlib.md5()
-        self._hash.update(key)
+        self._hmac = hmac.HMAC(key) # Defaults to MD5.
         self.reverse = reverse
         self.cbc = cbc
         self.debug = debug
@@ -75,11 +75,13 @@ class NLCrypt(object):
         return
 
     def _crypt(self, n0, g):
+        assert n0 < g
+        k = self._hmac.digest()
         h = hashlib.md5()
-        h.update(self._hash.digest())
+        h.update(k)
         v = h.digest()
         if self.cbc:
-            self._hash.update(v)
+            self._hmac.update(v)
         (i,) = struct.unpack('=I', v[:4])
         if self.reverse:
             n1 = (n0+g-i) % g

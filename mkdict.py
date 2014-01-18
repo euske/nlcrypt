@@ -193,8 +193,7 @@ class DictionaryConverter(object):
     for line in fp:
       (line,_,_) = line.strip().partition('#')
       if not line: continue
-      f = line.split('\t')
-      (w, pos) = (f[0], f[1])
+      w = line
       self.skip.add(w.lower())
     return
 

@@ -1,259 +1,259 @@
 # skip words
 
-and	!CC
-but	!CC
-nor	!CC
-or	!CC
-than	!CC
+and
+but
+nor
+or
+than
 
-a	!DT1
-an	!DT1
-another	DT
-any	DT
-each	DT1
-either	DT
-every	!DT1
-neither	DT1
-no	DT1
-that	!DT1
-the	!DT
-this	!DT1
+a
+an
+another
+any
+each
+either
+every
+neither
+no
+that
+the
+this
 
-some	!DTS
-these	!DTS
-those	!DTS
+some
+these
+those
 
-our	!PRP$
-your	!PRP$
-her	!PRP$
-his	!PRP$
-its	!PRP$
-my	!PRP$
-their	!PRP$
+our
+your
+her
+his
+its
+my
+their
 
-aboard	IN
-about	IN
-above	IN
-across	IN
-after	IN
-against	IN
-along	IN
-amid	IN
-amidst	IN
-among	IN
-amongst	IN
-around	IN
-at	!IN
-before	IN
-behind	IN
-below	IN
-beneath	IN
-beside	IN
-besides	IN
-between	IN
-beyond	IN
-but	IN
-by	!IN
-despite	IN
-down	IN
-during	IN
-except	IN
-for	IN
-from	IN
-in	!IN
-inside	IN
-into	IN
-like	IN
-near	IN
-of	!IN
-off	IN
-on	IN
-onto	IN
-out	IN
-outside	IN
-over	IN
-past	IN
-per	IN
-since	IN
-through	IN
-throughout	IN
-till	IN
-to	!TO
-toward	IN
-towards	IN
-under	IN
-unlike	IN
-until	IN
-up	IN
-upon	IN
-versus	IN
-via	IN
-vs	IN
-with	IN
-within	IN
-without	IN
+aboard
+about
+above
+across
+after
+against
+along
+amid
+amidst
+among
+amongst
+around
+at
+before
+behind
+below
+beneath
+beside
+besides
+between
+beyond
+but
+by
+despite
+down
+during
+except
+for
+from
+in
+inside
+into
+like
+near
+of
+off
+on
+onto
+out
+outside
+over
+past
+per
+since
+through
+throughout
+till
+to
+toward
+towards
+under
+unlike
+until
+up
+upon
+versus
+via
+vs
+with
+within
+without
 
-that	PRP
-this	PRP
-anybody	PRP
-anyone	PRP
-anything	PRP
-everybody	PRP
-everyone	PRP
-everything	PRP
-he	PRP
-hers	PRP
-herself	PRP
-him	PRP
-himself	PRP
-his	PRP
-it	PRP
-itself	PRP
-me	PRP
-mine	PRP
-myself	PRP
-nobody	PRP
-none	PRP
-nothing	PRP
-one	PRP
-oneself	PRP
-ours	PRP
-she	PRP
-so	PRP
-somebody	PRP
-someone	PRP
-something	PRP
-theirs	PRP
-whoever	PRP
-whomever	PRP
-yours	PRP
+that
+this
+anybody
+anyone
+anything
+everybody
+everyone
+everything
+he
+hers
+herself
+him
+himself
+his
+it
+itself
+me
+mine
+myself
+nobody
+none
+nothing
+one
+oneself
+ours
+she
+so
+somebody
+someone
+something
+theirs
+whoever
+whomever
+yours
 
-I	PRP2
-you	PRP2
-these	PRPS
-those	PRPS
-theirs	PRPS
-ourselves	PRPS
-themselves	PRPS
-them	PRPS
-they	PRPS
-us	PRPS
-we	PRPS
-yourself	PRPS
-both	PRPS
+I
+you
+these
+those
+theirs
+ourselves
+themselves
+them
+they
+us
+we
+yourself
+both
 
-least	PDT
-less	PDT
-lesser	PDT
-more	PDT
-most	PDT
-such	PDT
-enough	PDT
+least
+less
+lesser
+more
+most
+such
+enough
 
-all	PDTS
-both	PDTS
-few	PDTS
-many	PDTS
-several	PDTS
-some	PDTS
+all
+both
+few
+many
+several
+some
 
-after	RP
-although	RP
-as	!RP
-because	RP
-before	RP
-besides	RP
-by	!RP
-during	RP
-if	!RP
-in	!RP
-lest	RP
-like	RP
-once	RP
-only	RP
-since	RP
-so	RP
-though	RP
-till	RP
-unless	RP
-until	RP
-upon	RP
-when	RP
-whenever	RP
-where	RP
-whereas	RP
-wherever	RP
-while	RP
-with	RP
-without	RP
-not	RP
-even	RP
+after
+although
+as
+because
+before
+besides
+by
+during
+if
+in
+lest
+like
+once
+only
+since
+so
+though
+till
+unless
+until
+upon
+when
+whenever
+where
+whereas
+wherever
+while
+with
+without
+not
+even
 
-can't	MD
-couldn't	MD
-didn't	MD
-don't	MD
-needn't	MD
-shouldn't	MD
-won't	MD
-wouldn't	MD
-can	MD
-cannot	MD
-could	MD
-did	MD
-do	MD
-may	MD
-might	MD
-must	MD
-shall	MD
-should	MD
-will	MD
-would	MD
-does	MDZ
-doesn't	MDZ
+can't
+couldn't
+didn't
+don't
+needn't
+shouldn't
+won't
+wouldn't
+can
+cannot
+could
+did
+do
+may
+might
+must
+shall
+should
+will
+would
+does
+doesn't
 
-what	WDT
-whatever	WDT
-which	WDT
-whichever	WDT
+what
+whatever
+which
+whichever
 
-what	WP
-whatever	WP
-whatsoever	WP
-which	WP
-who	WP
-whom	WP
-whosoever	WP
+what
+whatever
+whatsoever
+which
+who
+whom
+whosoever
 
-whose	WP$
+whose
 
-how	WRB
-however	WRB
-whence	WRB
-whenever	WRB
-whereby	WRB
-whereever	WRB
-wherein	WRB
-whereof	WRB
-why	WRB
-whether	WRB
+how
+however
+whence
+whenever
+whereby
+whereever
+wherein
+whereof
+why
+whether
 
-be	!VB
-am	!VBP
-are	!VBP
-is	!VBZ
-was	!VBD
-were	!VBD
-been	!VBN
-being	VBG
+be
+am
+are
+is
+was
+were
+been
+being
 
-'t	!RP
-'s	!PRP$
-'m	!VBP
-'re	!VBP
-'s	!VBP
-'ve	!VBP
-'d	!MD
-'ll	!MD
-'em	!PRP
+'t
+'s
+'m
+'re
+'s
+'ve
+'d
+'ll
+'em
 

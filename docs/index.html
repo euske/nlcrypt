@@ -1,0 +1,90 @@
+<html><body>
+<h1>NLCrypt: Semantic Cryptography</h1>
+
+<h2>Introduction</h2>
+<p>
+NLCrypt is an attempt to create a cryptography system that doesn't
+look like a cryptography. It disguises a secret message as a
+grammatical (but nonsensical) text by changing its meanings. It can be
+used for a casual use to slip a secret message into web forums or
+emails. NLCrypt currently supports English text only.
+<p>
+<strong>Warning:</strong>
+This is just a proof-of-concept implementation. The encryption algorithm is not
+analyzed therefore neither its security nor reliability is guaranteed.
+Do not use this for serious purposes.
+
+<h2>How It Works</h2>
+<p>
+NLCrypt is basically a combination of a dictionary cipher and a Caesar
+method.  It takes each word in a message (except stop words) and
+shifts it in a dictionary.
+<p>
+Here's an example:
+<p>
+In a message "<code>He likes coffee.</code>", 
+the words "<code>likes</code>" and "<code>coffee</code>" are
+tagged as <code>VBZ+NNS</code> and <code>NN</code> respectively.
+This means that "<code>likes</code>" can be either a present tense verb 
+(<code>VBZ</code>) or a plural noun (<code>NNS</code>), while "<code>coffee</code>" 
+always takes a singular form (<code>NN</code>) because it is a mass noun.
+<p>
+Now, there are several other words that are tagged as <code>VBZ+NNS</code>.
+Such words include: <code>adds</code>, <code>backs</code>, 
+<code>calls</code>, <code>changes</code>, ... etc.
+"<code>likes</code>" is the 22nd word in this group.  This is replaced
+with another word in the group such as "<code><em>forms</em></code>".
+Note that changing "<code>likes</code>" to
+"<code><em>forms</em></code>" doesn't change the sentence's
+grammatical structure, because both can take a present tense verb or a
+plural noun (<code>VBZ+NNS</code>).
+<p>
+Similarly, "<code>coffee</code>" is replaced with another word in
+the <code>NN</code> group, such as "<code><em>heart</em></code>".
+This way, the entire message is translated to
+"<code><em>He forms heart.</em></code>", which is grammatically
+equivalent to the original sentense but has a rather different meaning.
+Using a certain cipher algorithm and a given key, 
+the translation can be different which is hard to predict 
+for outsiders.
+<p>
+<img src="fig1.png">
+
+<h3>Grouping with Word Frequency</h3>
+
+<p>
+Actual words are grouped not only by its part of speech, but also its
+frequency. This has two purposes.  First, this prevents a popular word
+from suddenly getting replaced with a rather uncommon word, because
+its transition is limited to the similarly popular words. Secondly,
+this prevents the frequency analysis because the rarity of each word
+doesn't give a hint to attackers.
+<p>
+In the actual implementation, a group of words is named
+using both its parts of speech and the frequency,
+such as <code>VBZ+NNS:8</code>, which means
+a word that can take either <code>VBZ</code> or <code>NNS</code> 
+and has a frequency level 8. A frequency level is defined as 
+the logarithm of the word frequency.
+
+<h2>Implementation</h2>
+
+<h3>Dictionary</h3>
+<p>
+WordNet is currently used.
+<p>
+Stop Words
+
+<h3>Cipher</h3>
+
+<p>
+HMAC and RpC4
+
+<h3>CBC Mode</h3>
+
+<h2>Weaknesses</h2>
+<p>
+The algorithm is vulnerable to words which are not in a dictionary,
+such as rare words, foreign words, proper nouns, numbers and URLs.  In
+such cases a letter-to-letter encryption is used, which can be vulnerable
+to a known plaintext attack.

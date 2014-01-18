@@ -43,3 +43,10 @@ Options:
  * -R ... Reverse the direction (decryption).
  * -C ... Enables CBC mode. It makes the encrypted text even more nonsensical
    (but probably harder to guess the meaning).
+
+
+Acknowledgements
+----------------
+
+ * WordNet is used as a dictionary.
+ * Sample texts and quotes are by Bruce Schneier.

@@ -1,4 +1,8 @@
-<html><body>
+<html>
+<head>
+<title>NLCrypt: Semantic Cryptography</title>
+</head>
+<body>
 <h1>NLCrypt: Semantic Cryptography</h1>
 
 <h2>Introduction</h2>
@@ -11,7 +15,7 @@ emails. NLCrypt currently supports English text only.
 <p>
 <strong>Warning:</strong>
 This is just a proof-of-concept implementation. The encryption algorithm is not
-analyzed therefore neither its security nor reliability is guaranteed.
+analyzed therefore there's no guarantee on its security or reliability.
 Do not use this for serious purposes.
 
 <h2>How It Works</h2>
@@ -68,6 +72,22 @@ and has a frequency level 8. A frequency level is defined as
 the logarithm of the word frequency.
 
 <h2>Implementation</h2>
+<p>
+The basic idea is to create a pseudo-random sequence from a shared key.
+One way to do this is to use the key as an input of a cipher.
+The cipher also takes the group ID of each word and generate a number
+corresponding to the word.
+<p>
+<img src="fig2.png">
+
+<h3>Cipher</h3>
+<p>
+HMAC-MD5 and RC4
+
+<h3>CBC Mode</h3>
+
+<p>
+<img src="fig3.png">
 
 <h3>Dictionary</h3>
 <p>
@@ -75,16 +95,17 @@ WordNet is currently used.
 <p>
 Stop Words
 
-<h3>Cipher</h3>
-
-<p>
-HMAC and RpC4
-
-<h3>CBC Mode</h3>
-
 <h2>Weaknesses</h2>
 <p>
 The algorithm is vulnerable to words which are not in a dictionary,
 such as rare words, foreign words, proper nouns, numbers and URLs.  In
 such cases a letter-to-letter encryption is used, which can be vulnerable
 to a known plaintext attack.
+<p>
+There are about 700 words that belongs to a group that has 
+less than 10 words. These words are easier to guess the original.
+For example, the group <code>VB+VBP+RB:0</code> has
+only one word: "<code>dingdong</code>"
+
+<hr>
+<address>Yusuke Shinyama</address>

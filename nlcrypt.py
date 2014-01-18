@@ -74,26 +74,26 @@ class NLCrypt(object):
         self._a1 = None
         return
 
-    def _crypt(self, n0, g):
-        assert n0 < g
+    def _crypt(self, i0, grp, n):
+        assert i0 < n
         k = self._hmac.digest()
-        v = struct.pack('=I', g)
+        v = struct.pack('=I', n)+grp
         v = arcfour.Arcfour(k).process(v)
         if self.cbc:
             self._hmac.update(v)
-        (i,) = struct.unpack('=I', v[:4])
+        (x,) = struct.unpack('=I', v[:4])
         if self.reverse:
-            n1 = (n0-i) % g
+            i1 = (i0-x) % n
         else:
-            n1 = (n0+i) % g
-        return n1
+            i1 = (i0+x) % n
+        return i1
 
     def crypt_letter(self, c0):
         if c0 in self.CHAR2GROUP:
-            (grp,n0) = self.CHAR2GROUP[c0]
+            (grp,i0) = self.CHAR2GROUP[c0]
             chars = self.GROUP2CHARS[grp]
-            n1 = self._crypt(n0, len(chars))
-            c1 = chars[n1]
+            i1 = self._crypt(i0, str(grp), len(chars))
+            c1 = chars[i1]
         else:
             c1 = c0
         return c1
@@ -120,13 +120,13 @@ class NLCrypt(object):
             w1 = w0
             self._debug_ignore(w0)
         elif k in self.WORD2GROUP:
-            (grp,n0) = self._word2group(k)
+            (grp,i0) = self._word2group(k)
             if grp:
                 words = self._group2words(grp)
-                n1 = self._crypt(n0, len(words))
-                w1 = words[n1]
+                i1 = self._crypt(i0, grp, len(words))
+                w1 = words[i1]
                 w1 = adjust_caps(w0, w1)
-                self._debug_word(w0,n0, grp, w1,n1)
+                self._debug_word(w0,i0, grp, w1,i1)
             else:
                 w1 = w0
                 self._debug_ignore(w0)
@@ -187,9 +187,9 @@ class NLCrypt(object):
         if self.debug:
             print 'ignore: %r' % w
         return
-    def _debug_word(self, w0,n0, grp, w1,n1):
+    def _debug_word(self, w0,i0, grp, w1,i1):
         if self.debug:
-            print 'word: %s(%s,%s) -> %s(%s,%s)' % (w0,grp,n0,w1,grp,n1)
+            print 'word: %s(%s,%s) -> %s(%s,%s)' % (w0,grp,i0,w1,grp,i1)
         return
     def _debug_unknown(self, w0, w1):
         if self.debug:

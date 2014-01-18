@@ -13,10 +13,10 @@
 ##
 import re
 import sys
-import hashlib
 import hmac
 import struct
 import os.path
+import arcfour
 try:
     import cdb
 except ImportError:
@@ -77,14 +77,13 @@ class NLCrypt(object):
     def _crypt(self, n0, g):
         assert n0 < g
         k = self._hmac.digest()
-        h = hashlib.md5()
-        h.update(k)
-        v = h.digest()
+        v = struct.pack('=I', g)
+        v = arcfour.Arcfour(k).process(v)
         if self.cbc:
             self._hmac.update(v)
         (i,) = struct.unpack('=I', v[:4])
         if self.reverse:
-            n1 = (n0+g-i) % g
+            n1 = (n0-i) % g
         else:
             n1 = (n0+i) % g
         return n1

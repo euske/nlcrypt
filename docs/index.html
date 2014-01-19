@@ -73,27 +73,38 @@ the logarithm of the word frequency.
 
 <h2>Implementation</h2>
 <p>
-The basic idea is to create a pseudo-random sequence from a shared key.
-One way to do this is to use the key as an input of a cipher.
-The cipher also takes the group ID of each word and generate a number
-corresponding to the word.
+The basic idea is to create a pseudo-random sequence from a shared
+secret.  In the following example, the cipher takes the shared secret
+and the group ID of each word and generate a number. The number is
+either added or subtracted from the word number depending on the type
+of processing (encryption or decryption).
 <p>
 <img src="fig2.png">
 
-<h3>Cipher</h3>
-<p>
-HMAC-MD5 and RC4
-
 <h3>CBC Mode</h3>
-
+<p>
+Furthermore, we can use HMAC instead of a constant seed.
+The HMAC is updated for each word using its output.
+This allows the input of the cipher to be different for every word,
+making the output more unpredictable (similar to 
+cipher block chaining in standard cryptography).
 <p>
 <img src="fig3.png">
 
+<p>
+In this implementation, we use HMAC-MD5 and RC4 for 
+the HMAC and the cipher function, respectively.
+
 <h3>Dictionary</h3>
 <p>
-WordNet is currently used.
+We use WordNet version 3.0 as a dictionary.
+It contains about 85,000 base words. The dictionary is expanded
+by an additional program (<code>mkdict.py</code>) to include
+different tenses and numbers. The total number of words 
+in the expanded dictionary is 191,606 (468 groups).
 <p>
-Stop Words
+A separate list of stop words is used to exclude
+function words such as pronouns or conjunctions.
 
 <h2>Weaknesses</h2>
 <p>
@@ -102,7 +113,7 @@ such as rare words, foreign words, proper nouns, numbers and URLs.  In
 such cases a letter-to-letter encryption is used, which can be vulnerable
 to a known plaintext attack.
 <p>
-There are about 700 words that belongs to a group that has 
+There are about 700 words that belongs to one of 239 groups that has 
 less than 10 words. These words are easier to guess the original.
 For example, the group <code>VB+VBP+RB:0</code> has
 only one word: "<code>dingdong</code>"

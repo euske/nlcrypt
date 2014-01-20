@@ -49,4 +49,4 @@ Acknowledgements
 ----------------
 
  * WordNet is used as a dictionary.
- * Sample texts and quotes are by Bruce Schneier.
+ * Sample texts are taken from Bruce Schneier's quotes.

@@ -29,7 +29,8 @@ Here's an example:
 In a message "<code>He likes coffee.</code>", 
 the words "<code>likes</code>" and "<code>coffee</code>" are
 tagged as <code>VBZ+NNS</code> and <code>NN</code> respectively.
-This means that "<code>likes</code>" can be either a present tense verb 
+These are part of speech tags, meaning that 
+"<code>likes</code>" can be either a present tense verb 
 (<code>VBZ</code>) or a plural noun (<code>NNS</code>), while "<code>coffee</code>" 
 always takes a singular form (<code>NN</code>) because it is a mass noun.
 <p>
@@ -47,7 +48,7 @@ Similarly, "<code>coffee</code>" is replaced with another word in
 the <code>NN</code> group, such as "<code><em>heart</em></code>".
 This way, the entire message is translated to
 "<code><em>He forms heart.</em></code>", which is grammatically
-equivalent to the original sentense but has a rather different meaning.
+equivalent to the original sentence but has a rather different meaning.
 Using a certain cipher algorithm and a given key, 
 the translation can be different which is hard to predict 
 for outsiders.
@@ -58,9 +59,10 @@ for outsiders.
 
 <p>
 Actual words are grouped not only by its part of speech, but also its
-frequency. This has two purposes.  First, this prevents a popular word
+frequency. This serves two purposes.  First, this prevents a popular word
 from suddenly getting replaced with a rather uncommon word, because
-its transition is limited to the similarly popular words. Secondly,
+it would look unnatural. The transition of a word is 
+limited to the similarly popular words. Secondly,
 this prevents the frequency analysis because the rarity of each word
 doesn't give a hint to attackers.
 <p>
@@ -69,7 +71,7 @@ using both its parts of speech and the frequency,
 such as <code>VBZ+NNS:8</code>, which means
 a word that can take either <code>VBZ</code> or <code>NNS</code> 
 and has a frequency level 8. A frequency level is defined as 
-the logarithm of the word frequency.
+the logarithm of the word occurrences.
 
 <h2>Implementation</h2>
 <p>
@@ -97,11 +99,11 @@ the HMAC and the cipher function, respectively.
 
 <h3>Dictionary</h3>
 <p>
-We use WordNet version 3.0 as a dictionary.
+We use WordNet version 3.0.
 It contains about 85,000 base words. The dictionary is expanded
 by an additional program (<code>mkdict.py</code>) to include
-different tenses and numbers. The total number of words 
-in the expanded dictionary is 191,606 (468 groups).
+different tenses and numbers. The total number of expanded 
+words is 191,606 in 468 groups.
 <p>
 A separate list of stop words is used to exclude
 function words such as pronouns or conjunctions.

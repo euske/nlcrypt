@@ -49,7 +49,10 @@ def get_pres3rd(s, exc):
   w = s.split('_')
   if 1 < len(w):
     return get_mw(w, get_pres3rd, exc)
-  return get_s(s)
+  elif s.endswith('o'):
+    return s+'es'
+  else:
+    return get_s(s)
 
 def get_past(s, exc):
   x = exc.get(s)
@@ -73,9 +76,9 @@ def get_pastpart(s, exc):
 def get_gerund(s, exc):
   x = exc.get(s)
   if x: return x
-  if s == 'see':
-    return 'seeing'
-  elif s.endswith('e'):
+  if s == 'be':
+    return s+'ing'
+  elif s.endswith('e') and not s.endswith('ee'):
     return s[:-1]+'ing'
   else:
     return s+'ing'

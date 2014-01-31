@@ -76,8 +76,8 @@ class NLCrypt(object):
 
     def _crypt(self, i0, grp, n):
         assert i0 < n
-        k = self._hmac.digest()
-        v = struct.pack('=I', n)+grp
+        k = self._hmac.digest()+grp
+        v = struct.pack('=I', n)
         v = arcfour.Arcfour(k).process(v)
         if self.cbc:
             self._hmac.update(v)

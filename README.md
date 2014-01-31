@@ -12,6 +12,11 @@ Demo
 
 http://nlcrypt.tabesugi.net/
 
+How It Works
+------------
+
+http://euske.github.io/nlcrypt/
+
 Installation
 ------------
 

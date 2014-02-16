@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# pycdb.py - Python implementation of cdb and tcdb
+# pycdb.py - Python implementation of cdb
 #
 #   by Yusuke Shinyama
 #   * public domain *
@@ -37,11 +37,13 @@ else:
 ##
 
 # cdbiter
-def cdbiter(fp, eod):
+def cdbiter(fp, eod=0):
   kloc = 2048
-  while kloc < eod:
+  while eod == 0 or kloc < eod:
     fp.seek(kloc)
-    (klen, vlen) = unpack('<II', fp.read(8))
+    x = fp.read(8)
+    if len(x) != 8: break
+    (klen, vlen) = unpack('<II', x)
     k = fp.read(klen)
     v = fp.read(vlen)
     kloc += 8+klen+vlen
@@ -51,10 +53,9 @@ def cdbiter(fp, eod):
 
 
 # CDBReader
-class CDBReader:
+class CDBReader(object):
   
-  def __init__(self, cdbname, docache=1):
-    self.name = cdbname
+  def __init__(self, cdbname, docache=False):
     self._fp = file(cdbname, 'rb')
     hash0 = decode(self._fp.read(2048))
     self._hash0 = [ (hash0[i], hash0[i+1]) for i in xrange(0, 512, 2) ]
@@ -71,6 +72,12 @@ class CDBReader:
 
   def __setstate__(self, dict):
     raise TypeError
+
+  def __contains__(self, k):
+    return self.has_key(k)
+  
+  def __iter__(self):
+    return self.iterkeys()
 
   def __getitem__(self, k):
     k = str(k)
@@ -114,9 +121,6 @@ class CDBReader:
     except KeyError:
       return False
 
-  def __contains__(self, k):
-    return self.has_key(k)
-
   def firstkey(self):
     self._keyiter = None
     return self.nextkey()
@@ -136,7 +140,7 @@ class CDBReader:
       return self._eachiter.next()
     except StopIteration:
       return None
-  
+
   def iterkeys(self):
     return ( k for (k,v) in cdbiter(self._fp, self._eod) )
   def itervalues(self):
@@ -146,15 +150,20 @@ class CDBReader:
 
 
 # CDBMaker
-class CDBMaker:
+class CDBMaker(object):
 
-  def __init__(self, cdbname, tmpname):
+  def __init__(self, cdbname, tmpname=None, repair=False):
     self.fn = cdbname
-    self.fntmp = tmpname
+    self.fntmp = tmpname or cdbname+'.tmp'
     self.numentries = 0
-    self._fp = file(tmpname, 'wb')
     self._pos = 2048                    # sizeof((h,p))*256
+    self._size = 2048
     self._bucket = [ array('I') for _ in xrange(256) ]
+    if repair:
+      self._fp = file(self.fntmp, 'rb+')
+      self._read()
+    else:
+      self._fp = file(self.fntmp, 'wb')
     return
 
   def __len__(self):
@@ -166,6 +175,9 @@ class CDBMaker:
   def __setstate__(self, dict):
     raise TypeError
 
+  def get_size(self):
+    return self._size
+
   def add(self, k, v):
     (k, v) = (str(k), str(v))
     (klen, vlen) = (len(k), len(v))
@@ -173,15 +185,31 @@ class CDBMaker:
     self._fp.write(pack('<II', klen, vlen))
     self._fp.write(k)
     self._fp.write(v)
+    self._addkey(k, 8+klen+vlen)
+    return self
+
+  def _addkey(self, k, size):
     h = cdbhash(k)
     b = self._bucket[h % 256]
     b.append(h)
     b.append(self._pos)
-    # sizeof(keylen)+sizeof(datalen)+sizeof(key)+sizeof(data)
-    self._pos += 8+klen+vlen
+    # size = sizeof(keylen)+sizeof(datalen)+sizeof(key)+sizeof(data)
+    self._pos += size
+    self._size += size+16 # bucket
     self.numentries += 1
-    return self
+    return
   
+  def _read(self):
+    self._fp.seek(self._pos)
+    while 1:
+      x = self._fp.read(8)
+      if len(x) != 8: break
+      (klen, vlen) = unpack('<II', x)
+      k = self._fp.read(klen)
+      v = self._fp.read(vlen)
+      self._addkey(k, 8+klen+vlen)
+    return
+    
   def finish(self):
     self._fp.seek(self._pos)
     pos_hash = self._pos
@@ -198,6 +226,7 @@ class CDBMaker:
         a[i] = h
         a[i+1] = p
       self._fp.write(encode(a))
+    assert self._fp.tell() == self._size
     # write header
     self._fp.seek(0)
     a = array('I')
@@ -265,207 +294,3 @@ def cdbmerge(iters):
 # aliases
 cdbmake = CDBMaker
 init = CDBReader
-
-
-##  TCDB
-##
-
-# tcdbiter
-def tcdbiter(fp, eor):
-  locs = {}
-  fp.seek(eor)
-  while 1:
-    x = fp.read(8)
-    if not x: break
-    (h, pos) = unpack('<II', x)
-    if pos: locs[pos] = h
-  pos = 2048
-  fp.seek(pos)
-  key = ()
-  parents = [0]
-  while pos < eor:
-    (klen, vlen) = unpack('<II', fp.read(8))
-    k = fp.read(klen)
-    v = fp.read(vlen)
-    h = locs[pos]
-    for (i,p) in enumerate(parents):
-      if cdbhash(k, p) == h:
-        parents = parents[:i+1]
-        key = key[:i]
-        break
-    key += (k,)
-    yield (key, v)
-    parents.append(pos)
-    pos += 8+klen+vlen
-  fp.close()
-  return
-
-
-# TCDBMaker
-class TCDBMaker(CDBMaker):
-
-  def __init__(self, cdbname, tmpname):
-    CDBMaker.__init__(self, cdbname, tmpname)
-    self._parent = 0
-    self._stack = [self._parent]
-    return
-
-  def put(self, depth, k, v):
-    if depth == len(self._stack)+1:
-      self._stack.append(self._parent)
-    elif depth < len(self._stack):
-      self._stack = self._stack[:depth]
-    elif depth != len(self._stack):
-      raise ValueError('invalid depth: %d' % depth)
-    #
-    (k, v) = (str(k), str(v))
-    (klen, vlen) = (len(k), len(v))
-    self._parent = self._pos
-    # sizeof(keylen)+sizeof(datalen)+sizeof(key)+sizeof(data)
-    self._fp.seek(self._pos)
-    self._fp.write(pack('<II', klen, vlen))
-    self._fp.write(k)
-    self._fp.write(v)
-    self._pos += 4+4+klen+vlen
-    h = cdbhash(k, self._stack[-1])
-    b = self._bucket[h % 256]
-    b.append(h)
-    b.append(self._parent)
-    self.numentries += 1
-    return self
-
-  def txt2tcdb(self, lines):
-    import re
-    HEAD = re.compile(r'^(\++)(\d+),(\d+):')
-    for line in lines:
-      m = HEAD.match(line)
-      if not m: break
-      (depth, klen, vlen) = (len(m.group(1)), int(m.group(2)), int(m.group(3)))
-      i = len(m.group(0))
-      k = line[i:i+klen]
-      i += klen
-      if line[i:i+2] != '->': raise ValueError('invalid separator: %r' % line)
-      i += 2
-      v = line[i:i+vlen]
-      self.put(depth, k, v)
-    return self
-
-
-# TCDBReader
-class TCDBReader(CDBReader):
-
-  def lookup(self, seq, parent=0L):
-    r = []
-    for k in seq:
-      (v, parent) = self.lookup1(k, parent)
-      r.append(v)
-    return r
-
-  def lookup1(self, k, parent=0L):
-    k = str(k)
-    if self._docache and (parent,k) in self._cache:
-      return self._cache[(parent,k)]
-    h = cdbhash(k, parent)
-    self._fp.seek((h % 256) << 3)
-    (pos_bucket, ncells) = unpack('<II', self._fp.read(8))
-    if ncells == 0: raise KeyError(k)
-    start = (h >> 8) % ncells
-    for i in xrange(ncells):
-      self._fp.seek(pos_bucket + ((start+i) % ncells << 3))
-      (h1, p1) = unpack('<II', self._fp.read(8))
-      if p1 == 0: raise KeyError(k)
-      if h1 == h:
-        self._fp.seek(p1)
-        (klen, vlen) = unpack('<II', self._fp.read(8))
-        k1 = self._fp.read(klen)
-        if k1 == k:
-          v1 = self._fp.read(vlen)
-          if self._docache:
-            self._cache[(parent,k)] = (v1,p1)
-          return (v1,p1)
-    raise KeyError(k)
-
-  def iterkeys(self):
-    return ( k for (k,v) in tcdbiter(self._fp, self._eod) )
-  def itervalues(self):
-    return ( v for (k,v) in tcdbiter(self._fp, self._eod) )
-  def iteritems(self):
-    return tcdbiter(self._fp, self._eod)
-
-
-# tcdbdump
-def tcdbdump(cdbname):
-  fp = file(cdbname, 'rb')
-  (eor,) = unpack('<I', fp.read(4))
-  return tcdbiter(fp, eor)
-
-
-# aliases
-tcdbmake = TCDBMaker
-tcdbinit = TCDBReader
-tcdbmerge = cdbmerge
-
-
-# main
-def main(argv):
-  import getopt, fileinput
-  def usage():
-    print 'usage: %s {cmake,cget,cdump,cmerge} [options] cdbname [args ...]' % argv[0]
-    print 'usage: %s {tmake,tget,tdump,tmerge} [options] tcdbname [args ...]' % argv[0]
-    return 100
-  args = argv[1:]
-  if not args: return usage()
-  cmd = args.pop(0)
-  try:
-    (opts, args) = getopt.getopt(args, 'kv2')
-  except getopt.GetoptError:
-    return usage()
-  if not args: return usage()
-  dbname = args.pop(0)
-  
-  # cdb
-  if cmd == 'cmake':
-    CDBMaker(dbname, dbname+'.tmp').txt2cdb(fileinput.input(args)).finish()
-  elif cmd == 'cget':
-    print repr(CDBReader(dbname).get(args[0]))
-  elif cmd == 'cdump':
-    f = (lambda k,v: '+%d,%d:%s->%s' % (len(k), len(v), k, v))
-    for (k, v) in opts:
-      if k == '-k': f = (lambda k,_: k)
-      elif k == '-v': f = (lambda _,v: v)
-      elif k == '-2': f = (lambda k,v: k+'\t'+v)
-    for (k,v) in cdbdump(dbname):
-      print f(k,v)
-    print
-  elif cmd == 'cmerge':
-    dbs = [ cdbdump(fname) for fname in args ]
-    m = CDBMaker(dbname, dbname+'.tmp')
-    for (k,vs) in tcdbmerge(dbs):
-      m.add(k, ' '.join(vs))
-    m.finish()
-  # tcdb
-  elif cmd == 'tmake':
-    TCDBMaker(dbname, dbname+'.tmp').txt2tcdb(fileinput.input(args)).finish()
-  elif cmd == 'tget':
-    print repr(TCDBReader(dbname).lookup(args))
-  elif cmd == 'tdump':
-    f = (lambda k,v: '%s%d,%d:%s->%s' % ('+'*len(k), len(k[-1]), len(v), k[-1], v))
-    for (k, v) in opts:
-      if k == '-k': f = (lambda k,_: '/'.join(k))
-      elif k == '-v': f = (lambda _,v: v)
-      elif k == '-2': f = (lambda k,v: '/'.join(k)+'\t'+v)
-    for (k,v) in tcdbdump(dbname):
-      print f(k,v)
-    print
-  elif cmd == 'tmerge':
-    dbs = [ tcdbdump(fname) for fname in args ]
-    m = TCDBMaker(dbname, dbname+'.tmp')
-    for (k,vs) in tcdbmerge(dbs):
-      m.put(len(k), k[-1], ' '.join(vs))
-    m.finish()
-    
-  else:
-    return usage()
-  return
-
-if __name__ == '__main__': sys.exit(main(sys.argv))
